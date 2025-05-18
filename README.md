@@ -12,25 +12,13 @@ $ npm install
 ## Running the app
 
 ```bash
-# development
+# 1. populate User DB
+$ npm run start:seed
+
+# 2. check data in DB
+$ npm run start:db
+
+# 3. running server locally
 $ npm run start
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
