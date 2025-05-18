@@ -1,13 +1,14 @@
 import { DataSource } from "typeorm";
-import { User } from "./src/users/user.entity";
 import * as bcrypt from 'bcryptjs';
+import { User } from "./src/users/user.entity";
+import { File } from './src/file/file.entity';
 
 const SALT_ROUNDS = 10;
 
 const AppDataSource = new DataSource({
     type: 'sqlite',
     database: './data/sqlite.db',
-    entities: [User],
+    entities: [User, File],
     synchronize: true,
 });
 
@@ -15,12 +16,12 @@ async function seed() {
     await AppDataSource.initialize();
 
     const userRepo = AppDataSource.getRepository(User);
-    const existing = await userRepo.findOneBy({ username: "admin1" });
+    const existing = await userRepo.findOneBy({ email: "test@example.com" });
 
     if(!existing) {
         const hashedPassword = await bcrypt.hash('password', SALT_ROUNDS);
         const user = userRepo.create({
-            username: 'admin1',
+            email: 'test@example.com',
             password: hashedPassword,
         });
         await userRepo.save(user);
@@ -33,4 +34,6 @@ async function seed() {
     await AppDataSource.destroy();
 }
 
-seed();
+seed().catch((err) => {
+  console.error('Seed failed', err);
+});

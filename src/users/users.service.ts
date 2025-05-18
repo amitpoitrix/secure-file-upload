@@ -7,7 +7,7 @@ import { Injectable } from "@nestjs/common";
 export class UsersService {
     constructor(@InjectRepository(User) private readonly userRepo: Repository<User>) {}
 
-    async findByUsername(username: string) {
-        return this.userRepo.findOneBy({ username });
+    async findByEmail(email: string) {
+        return this.userRepo.findOneBy({ email });
     }
 }

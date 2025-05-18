@@ -3,7 +3,8 @@ import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'auth/auth.module';
 import { UsersModule } from 'users/users.module';
-import { FileModule } from 'file/file.module';
+import { QueueModule } from 'queue/queue.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { FileModule } from 'file/file.module';
     AuthModule,
     UsersModule,
     FileModule,
+    QueueModule
   ],
   controllers: [AppController],
   providers: [],

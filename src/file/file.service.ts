@@ -1,36 +1,56 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { File } from "./file.entity";
 import { Repository } from "typeorm";
-import { Status } from "./file.dto";
+import { FileStatus, UploadFileDto } from "./file.dto";
+import { InjectQueue } from "@nestjs/bullmq";
+import { Queue } from "bullmq";
 
 @Injectable()
 export class FileService {
-    constructor(@InjectRepository(File) private fileRepo: Repository<File>) {}
+    constructor(
+        @InjectQueue('file-processing') private readonly fileQueue: Queue,
+        @InjectRepository(File) private readonly fileRepository: Repository<File>,
+    ) {}
 
-    async savefile(file: Express.Multer.File) {
-        const newFile = this.fileRepo.create({
-            originalName: file.originalname,
-            filename: file.filename,
-            path: file.path,
-            status: Status.PENDING,
+    async uploadFile(userId: number, file: Express.Multer.File, uploadFileDtodto: UploadFileDto) {
+        const newFile = this.fileRepository.create({
+            user: {
+                id: userId
+            },
+            originalFilename: file.originalname,
+            storagePath: file.path,
+            title: uploadFileDtodto.title,
+            description: uploadFileDtodto.description,
+            status: FileStatus.UPLOADED
         });
 
-        const saved = await this.fileRepo.save(newFile);
+        const savedFile = await this.fileRepository.save(newFile);
 
-        /** Simulating background process for 5 sec */
-        setTimeout(async () => {
-            saved.status = Status.COMPLETED;
-            await this.fileRepo.save(saved);
-        }, 15000);
+        await this.fileQueue.add('process-file', {
+            fileId: savedFile.id,
+        });
 
-        return saved;
+        return {
+            fileId: savedFile.id,
+            status: savedFile.status,
+        }
     }
 
-    async getFileStatus(id: number) {
-        const file = await this.fileRepo.findOneBy({ id });
-        return {
-            status: file?.status || Status.NOT_FOUND
+    async getFileById(id: number, userId: number) {
+        const file = await this.fileRepository.findOne({ 
+            where: {
+                id,
+                user: {
+                    id: userId
+                }
+            }
+        });
+
+        if(!file) {
+            throw new NotFoundException('File not found or access denied');
         }
+
+        return file;
     }
 }
