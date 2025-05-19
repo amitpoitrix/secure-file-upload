@@ -24,6 +24,7 @@
   "dependencies": {
     "@nestjs/bullmq": "^10.2.2",
     "@nestjs/common": "^9.0.0",
+    "@nestjs/config": "^3.3.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.0",

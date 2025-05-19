@@ -8,18 +8,22 @@ import { FileModule } from './file/file.module';
 import { User } from 'user/user.entity';
 import { File } from './file/file.entity';
 import { BullModule } from '@nestjs/bullmq';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     BullModule.forRoot({
         connection: {
-            host: 'localhost',
-            port: 6379
+            host: process.env.REDIS_HOST,
+            port: parseInt(process.env.REDIS_PORT),
         }
     }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: './data/sqlite.db',
+      database: process.env.DATABASE_PATH,
       entities: [User, File],
       synchronize: true,
     }),
