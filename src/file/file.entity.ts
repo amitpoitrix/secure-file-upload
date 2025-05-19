@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../users/user.entity";
 import { FileStatus } from "./file.dto";
 
@@ -7,8 +7,8 @@ export class File {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToMany(() => User, (user) => user.files, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'user_id' })
+    @ManyToOne(() => User, (user) => user.files, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'userId' })
     user: User;
 
     @Column({ name: 'original_filename' })

@@ -5,13 +5,22 @@ import { AuthModule } from 'auth/auth.module';
 import { UsersModule } from 'users/users.module';
 import { QueueModule } from 'queue/queue.module';
 import { FileModule } from './file/file.module';
+import { User } from 'user/user.entity';
+import { File } from './file/file.entity';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
+    BullModule.forRoot({
+        connection: {
+            host: 'localhost',
+            port: 6379
+        }
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: './data/sqlite.db',
-      entities: [__dirname + '/**/*.entity.{ts,js}'],
+      entities: [User, File],
       synchronize: true,
     }),
     AuthModule,

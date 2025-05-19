@@ -5,19 +5,29 @@ import { Repository } from "typeorm";
 import { FileStatus, UploadFileDto } from "./file.dto";
 import { InjectQueue } from "@nestjs/bullmq";
 import { Queue } from "bullmq";
+import { User } from "user/user.entity";
 
 @Injectable()
 export class FileService {
     constructor(
         @InjectQueue('file-processing') private readonly fileQueue: Queue,
         @InjectRepository(File) private readonly fileRepository: Repository<File>,
+        @InjectRepository(User) private readonly userRepository: Repository<User>,
     ) {}
 
     async uploadFile(userId: number, file: Express.Multer.File, uploadFileDtodto: UploadFileDto) {
-        const newFile = this.fileRepository.create({
-            user: {
+        const user = await this.userRepository.findOne({
+            where: {
                 id: userId
-            },
+            }
+        });
+
+        if(!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const newFile = this.fileRepository.create({
+            user,
             originalFilename: file.originalname,
             storagePath: file.path,
             title: uploadFileDtodto.title,
@@ -30,6 +40,8 @@ export class FileService {
         await this.fileQueue.add('process-file', {
             fileId: savedFile.id,
         });
+
+        const fileAgain = await this.fileRepository.findOne({ where: { id: savedFile.id } });
 
         return {
             fileId: savedFile.id,

@@ -4,10 +4,11 @@ import { FileController } from "./file.controller";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { File } from "./file.entity";
 import { QueueModule } from "queue/queue.module";
+import { User } from "user/user.entity";
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([File]),
+        TypeOrmModule.forFeature([File, User]),
         QueueModule,
     ],
     controllers: [FileController],
